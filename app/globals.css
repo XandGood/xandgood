@@ -66,3 +66,12 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .glass {
+    @apply bg-background/60 backdrop-blur-xl border border-foreground/5 shadow-sm;
+  }
+  .glass-darker {
+    @apply bg-background/80 backdrop-blur-xl border border-foreground/5 shadow-sm;
+  }
+}

@@ -1,44 +1,30 @@
-import { NextLogo } from "./next-logo";
-import { SupabaseLogo } from "./supabase-logo";
+interface HeroProps {
+  postCount: number;
+  viewCount: string;
+}
 
-export function Hero() {
+export function Hero({ postCount, viewCount }: HeroProps) {
   return (
-    <div className="flex flex-col gap-16 items-center">
-      <div className="flex gap-8 justify-center items-center">
-        <a
-          href="https://supabase.com/?utm_source=create-next-app&utm_medium=template&utm_term=nextjs"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <SupabaseLogo />
-        </a>
-        <span className="border-l rotate-45 h-6" />
-        <a href="https://nextjs.org/" target="_blank" rel="noreferrer">
-          <NextLogo />
-        </a>
+    <section className="relative flex items-end justify-between gap-8 pt-16 pb-10">
+      <div className="flex flex-col gap-2">
+        <h1 className="text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-br from-foreground to-foreground/50 bg-clip-text text-transparent">
+          Xandgood
+        </h1>
+        <p className="text-base text-muted-foreground">
+          记录思考，分享技术
+        </p>
       </div>
-      <h1 className="sr-only">Supabase and Next.js Starter Template</h1>
-      <p className="text-3xl lg:text-4xl !leading-tight mx-auto max-w-xl text-center">
-        The fastest way to build apps with{" "}
-        <a
-          href="https://supabase.com/?utm_source=create-next-app&utm_medium=template&utm_term=nextjs"
-          target="_blank"
-          className="font-bold hover:underline"
-          rel="noreferrer"
-        >
-          Supabase
-        </a>{" "}
-        and{" "}
-        <a
-          href="https://nextjs.org/"
-          target="_blank"
-          className="font-bold hover:underline"
-          rel="noreferrer"
-        >
-          Next.js
-        </a>
-      </p>
-      <div className="w-full p-[1px] bg-gradient-to-r from-transparent via-foreground/10 to-transparent my-8" />
-    </div>
+
+      <div className="flex items-end gap-6 pb-1">
+        <div className="flex flex-col items-end">
+          <span className="text-3xl lg:text-4xl font-bold tabular-nums">{postCount}</span>
+          <span className="text-xs text-muted-foreground">篇文章</span>
+        </div>
+        <div className="flex flex-col items-end">
+          <span className="text-3xl lg:text-4xl font-bold tabular-nums">{viewCount}</span>
+          <span className="text-xs text-muted-foreground">次浏览</span>
+        </div>
+      </div>
+    </section>
   );
 }
