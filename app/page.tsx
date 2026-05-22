@@ -1,54 +1,14 @@
 import { Hero } from "@/components/hero";
 import { BlogCard } from "@/components/blog-card";
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import { getPublishedPosts } from "@/lib/data/posts";
+import { getTagsWithCount } from "@/lib/data/tags";
+import { getSiteSettings } from "@/lib/data/posts";
 
-const posts = [
-  {
-    title: "构建现代博客的技术选型",
-    summary: "从零开始搭建一个基于 Next.js 和 Supabase 的个人博客，聊聊技术栈的选择与权衡。",
-    date: "2026-05-20",
-    category: "前端",
-    tags: ["Next.js", "Supabase", "TypeScript"],
-    slug: "tech-stack-for-blog",
-  },
-  {
-    title: "TypeScript 高级类型体操",
-    summary: "深入探索条件类型、模板字面量类型、infer 关键字等进阶技巧。",
-    date: "2026-05-15",
-    category: "TypeScript",
-    tags: ["TypeScript", "类型系统"],
-    slug: "typescript-advanced-types",
-  },
-  {
-    title: "设计模式在实际项目中的应用",
-    summary: "观察者模式、策略模式、工厂模式在前端项目中的真实案例与思考。",
-    date: "2026-05-10",
-    category: "架构",
-    tags: ["设计模式", "架构"],
-    slug: "design-patterns-in-practice",
-  },
-  {
-    title: "React 19 新特性速览",
-    summary: "Server Components、Actions、use() hook 等新特性一网打尽。",
-    date: "2026-05-05",
-    category: "前端",
-    tags: ["React", "Next.js"],
-    slug: "react-19-new-features",
-  },
-];
-
-const tags = [
-  { name: "Next.js", count: 3 },
-  { name: "React", count: 2 },
-  { name: "TypeScript", count: 2 },
-  { name: "Supabase", count: 1 },
-  { name: "设计模式", count: 1 },
-  { name: "架构", count: 1 },
-  { name: "前端", count: 2 },
-  { name: "类型系统", count: 1 },
-];
-
-export default function Home() {
+export default async function Home() {
+  const settings = await getSiteSettings();
+  const { posts } = await getPublishedPosts(1, settings?.posts_per_page || 10);
+  const tags = await getTagsWithCount();
   return (
     <div className="min-h-screen flex flex-col relative dark text-foreground selection:bg-purple-500/30 overflow-x-hidden">
       {/* Liquid Background orbs */}
@@ -69,12 +29,20 @@ export default function Home() {
         <div className="flex gap-8">
           {/* Left: hero + article list */}
           <div className="flex-1 min-w-0">
-            <Hero postCount={4} viewCount="3.2k" />
+            <Hero postCount={posts.length} viewCount={`${posts.length}`} />
             <h2 className="text-sm font-medium text-muted-foreground mb-6">文章</h2>
 
             <div className="flex flex-col gap-4">
               {posts.map((post) => (
-                <BlogCard key={post.slug} {...post} />
+                <BlogCard
+                  key={post.id}
+                  title={post.title}
+                  summary={post.summary}
+                  date={post.published_at ? new Date(post.published_at).toLocaleDateString("zh-CN") : ""}
+                  category={post.category?.name}
+                  tags={post.tags?.map((t) => t.name)}
+                  slug={post.slug}
+                />
               ))}
             </div>
 
@@ -99,7 +67,7 @@ export default function Home() {
               <div className="flex flex-wrap gap-3">
                 {tags.map((tag) => (
                   <button
-                    key={tag.name}
+                    key={tag.id}
                     className="glass-pill px-4 py-2 text-[11px] text-white/70 hover:text-white hover:bg-white/[0.08] hover:shadow-[0_0_10px_rgba(255,255,255,0.2)] flex items-center gap-2"
                   >
                     {tag.name}
