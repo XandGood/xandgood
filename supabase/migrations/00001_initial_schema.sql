@@ -76,9 +76,9 @@ create table profiles (
 -- 站点设置表（单例行）
 create table site_settings (
   id integer primary key default 1 check (id = 1),
-  blog_name text default 'Xandgood',
+  blog_name text default 'XandGood',
   description text default '记录思考，分享技术',
-  footer text default '© 2026 Xandgood. All rights reserved.',
+  footer text default '© 2026 XandGood. All rights reserved.',
   posts_per_page integer default 10
 );
 

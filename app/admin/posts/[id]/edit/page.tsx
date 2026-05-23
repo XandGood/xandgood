@@ -12,9 +12,11 @@ export default async function EditPostPage({
   const { data: post } = await admin.from("posts").select("*").eq("id", id).single();
   if (!post) return <p className="text-white/40">文章不存在</p>;
 
-  const { data: categories } = await admin.from("categories").select("*").order("name");
-  const { data: tags } = await admin.from("tags").select("*").order("name");
-  const { data: postTags } = await admin.from("post_tags").select("tag_id").eq("post_id", id);
+  const [{ data: categories }, { data: tags }, { data: postTags }] = await Promise.all([
+    admin.from("categories").select("*").order("name"),
+    admin.from("tags").select("*").order("name"),
+    admin.from("post_tags").select("tag_id").eq("post_id", id),
+  ]);
   const selectedTagIds = new Set(postTags?.map((pt) => pt.tag_id));
 
   return (

@@ -8,7 +8,7 @@ export function Hero({ postCount, viewCount }: HeroProps) {
     <section className="relative flex items-end justify-between gap-8 pt-6 pb-12">
       <div className="flex flex-col gap-4 relative z-10">
         <h1 className="text-5xl lg:text-7xl font-black tracking-tight text-white mb-2 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
-          Xandgood
+          XandGood
         </h1>
         <p className="text-lg text-white/60 font-light tracking-wide">
           <span className="glass-pill px-4 py-1.5 inline-block">记录思考，分享技术</span>

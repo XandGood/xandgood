@@ -10,7 +10,7 @@ export async function getPublishedPosts(
 
   let query = supabase
     .from("posts")
-    .select("*, category:categories(*)", { count: "exact" })
+    .select("*, category:categories(*), post_tags(tag:tags(*))", { count: "exact" })
     .eq("status", "published")
     .order("published_at", { ascending: false })
     .range((page - 1) * perPage, page * perPage - 1);
@@ -21,23 +21,16 @@ export async function getPublishedPosts(
 
   const { data: posts, error, count } = await query;
 
-  if (error || !posts) {
+  if (error || !posts || posts.length === 0) {
     return { posts: [], total: 0 };
   }
 
-  const postsWithTags: Post[] = [];
-  for (const post of posts) {
-    const { data: ptData } = await supabase
-      .from("post_tags")
-      .select("tag:tags(*)")
-      .eq("post_id", post.id);
-
-    const tags = (ptData || [])
-      .map((pt: Record<string, unknown>) => pt.tag as Tag | null)
-      .filter((t): t is Tag => t !== null);
-
-    postsWithTags.push({ ...post, tags });
-  }
+  const postsWithTags = posts.map((post: Record<string, unknown>) => ({
+    ...post,
+    tags: ((post.post_tags as Array<{ tag: Tag }>) || [])
+      .map((pt) => pt.tag)
+      .filter(Boolean),
+  })) as Post[];
 
   return { posts: postsWithTags, total: count || 0 };
 }
@@ -47,39 +40,27 @@ export async function getPostBySlug(slug: string) {
 
   const { data: post, error } = await supabase
     .from("posts")
-    .select("*, category:categories(*)")
+    .select("*, category:categories(*), post_tags(tag:tags(*)), likes(count)")
     .eq("slug", slug)
     .eq("status", "published")
     .single();
 
   if (error || !post) return null;
 
-  const { data: ptData } = await supabase
-    .from("post_tags")
-    .select("tag:tags(*)")
-    .eq("post_id", post.id);
+  const raw = post as Record<string, unknown>;
+  const tags = ((raw.post_tags as Array<{ tag: Tag }>) || [])
+    .map((pt) => pt.tag)
+    .filter(Boolean);
 
-  const tags = (ptData || [])
-    .map((pt: Record<string, unknown>) => pt.tag as Tag | null)
-    .filter((t): t is Tag => t !== null);
+  const likesData = raw.likes as Array<{ count: number }> | undefined;
+  const likes_count = likesData?.[0]?.count || 0;
 
-  const { count: likes_count } = await supabase
-    .from("likes")
-    .select("*", { count: "exact", head: true })
-    .eq("post_id", post.id);
-
-  let user_liked = false;
-  const { data: { user } } = await supabase.auth.getUser();
-  if (user) {
-    const { count: myLike } = await supabase
-      .from("likes")
-      .select("*", { count: "exact", head: true })
-      .eq("post_id", post.id)
-      .eq("user_id", user.id);
-    user_liked = (myLike || 0) > 0;
-  }
-
-  return { ...post, tags, likes_count: likes_count || 0, user_liked } as Post;
+  return {
+    ...post,
+    tags,
+    likes_count,
+    user_liked: false,
+  } as Post;
 }
 
 export async function getSiteSettings() {

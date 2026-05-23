@@ -1,7 +1,7 @@
 "use server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
+import { adminAction } from "@/lib/admin-action";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -14,12 +14,7 @@ function slugify(text: string) {
     .replace(/^-|-$/g, "");
 }
 
-export async function createPost(formData: FormData) {
-  const supabase = await createClient();
-  const { data: claimsData } = await supabase.auth.getClaims();
-  if (!claimsData?.claims) redirect("/auth/login");
-  if (claimsData?.claims?.app_metadata?.is_admin !== true) redirect("/");
-
+export const createPost = adminAction("createPost", async (formData) => {
   const admin = createAdminClient();
   const title = formData.get("title") as string;
   const slug = slugify(title) + "-" + Date.now().toString(36);
@@ -39,29 +34,25 @@ export async function createPost(formData: FormData) {
     .select()
     .single();
 
-  if (error || !post) redirect("/admin/posts?error=create-failed");
+  if (error || !post) throw error || new Error("创建文章失败");
 
   if (tagIds.length > 0) {
-    await admin.from("post_tags").insert(tagIds.map((tag_id) => ({ post_id: post.id, tag_id })));
+    const { error: tagError } = await admin.from("post_tags").insert(tagIds.map((tag_id) => ({ post_id: post.id, tag_id })));
+    if (tagError) throw tagError;
   }
 
   revalidatePath("/blog");
   revalidatePath("/");
   redirect("/admin/posts");
-}
+});
 
-export async function updatePost(formData: FormData) {
-  const supabase = await createClient();
-  const { data: claimsData } = await supabase.auth.getClaims();
-  if (!claimsData?.claims) redirect("/auth/login");
-  if (claimsData?.claims?.app_metadata?.is_admin !== true) redirect("/");
-
+export const updatePost = adminAction("updatePost", async (formData) => {
   const admin = createAdminClient();
   const id = formData.get("id") as string;
   const status = formData.get("status") as string;
   const tagIds = formData.getAll("tag_ids") as string[];
 
-  await admin
+  const { error } = await admin
     .from("posts")
     .update({
       title: formData.get("title") as string,
@@ -73,29 +64,29 @@ export async function updatePost(formData: FormData) {
       updated_at: new Date().toISOString(),
     })
     .eq("id", id);
+  if (error) throw error;
 
-  await admin.from("post_tags").delete().eq("post_id", id);
+  const { error: delError } = await admin.from("post_tags").delete().eq("post_id", id);
+  if (delError) throw delError;
+
   if (tagIds.length > 0) {
-    await admin.from("post_tags").insert(tagIds.map((tag_id) => ({ post_id: id, tag_id })));
+    const { error: tagError } = await admin.from("post_tags").insert(tagIds.map((tag_id) => ({ post_id: id, tag_id })));
+    if (tagError) throw tagError;
   }
 
   revalidatePath("/blog");
   revalidatePath("/");
   revalidatePath(`/posts/${formData.get("slug")}`);
   redirect("/admin/posts");
-}
+});
 
-export async function deletePost(formData: FormData) {
-  const supabase = await createClient();
-  const { data: claimsData } = await supabase.auth.getClaims();
-  if (!claimsData?.claims) redirect("/auth/login");
-  if (claimsData?.claims?.app_metadata?.is_admin !== true) redirect("/");
-
+export const deletePost = adminAction("deletePost", async (formData) => {
   const admin = createAdminClient();
   const id = formData.get("id") as string;
-  await admin.from("posts").delete().eq("id", id);
+  const { error } = await admin.from("posts").delete().eq("id", id);
+  if (error) throw error;
 
   revalidatePath("/blog");
   revalidatePath("/");
   redirect("/admin/posts");
-}
+});

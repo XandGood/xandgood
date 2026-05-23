@@ -55,13 +55,7 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("is_banned")
-      .eq("id", claims.sub)
-      .single();
-
-    if (profile?.is_banned) {
+    if (claims.app_metadata?.is_banned === true) {
       const url = request.nextUrl.clone();
       url.pathname = "/auth/login";
       return NextResponse.redirect(url);

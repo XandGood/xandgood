@@ -1,21 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Heart } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 export function LikeButton({
   postId,
-  initialLiked,
   initialCount,
 }: {
   postId: string;
-  initialLiked: boolean;
   initialCount: number;
 }) {
-  const [liked, setLiked] = useState(initialLiked);
+  const [liked, setLiked] = useState(false);
   const [count, setCount] = useState(initialCount);
   const [loading, setLoading] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      const user = data.user;
+      if (!user) return;
+      setUserId(user.id);
+      supabase
+        .from("likes")
+        .select("*", { count: "exact", head: true })
+        .eq("post_id", postId)
+        .eq("user_id", user.id)
+        .then(({ count: c }) => {
+          if ((c || 0) > 0) setLiked(true);
+        });
+    });
+  }, [postId]);
 
   const toggleLike = async () => {
     const supabase = createClient();

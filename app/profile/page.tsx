@@ -4,34 +4,17 @@ import { Nav } from "@/components/nav";
 import { ProfileForm } from "./profile-form";
 import type { Comment, Like, Post } from "@/lib/types";
 
-import { unstable_noStore as noStore } from "next/cache";
-
 export default async function ProfilePage() {
-  noStore();
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) redirect("/auth/login");
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-
-  const { data: comments } = await supabase
-    .from("comments")
-    .select("*, post:posts(id, title, slug)")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(20);
-
-  const { data: likes } = await supabase
-    .from("likes")
-    .select("*, post:posts(id, title, slug)")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(20);
+  const [{ data: profile }, { data: comments }, { data: likes }] = await Promise.all([
+    supabase.from("profiles").select("*").eq("id", user.id).single(),
+    supabase.from("comments").select("*, post:posts(id, title, slug)").eq("user_id", user.id).order("created_at", { ascending: false }).limit(20),
+    supabase.from("likes").select("*, post:posts(id, title, slug)").eq("user_id", user.id).order("created_at", { ascending: false }).limit(20),
+  ]);
 
   return (
     <div className="min-h-screen flex flex-col dark text-foreground">
@@ -100,7 +83,7 @@ export default async function ProfilePage() {
 
       <footer className="border-t border-white/5 mt-auto relative z-10 glass-liquid rounded-b-none rounded-t-[3rem]">
         <div className="max-w-7xl mx-auto flex items-center justify-center h-20 px-5 text-xs text-white/40">
-          <p>© 2026 Xandgood. All rights reserved.</p>
+          <p>© 2026 XandGood. All rights reserved.</p>
         </div>
       </footer>
     </div>

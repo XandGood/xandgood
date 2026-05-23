@@ -3,8 +3,10 @@ import { NewPostClient } from "./new-post-client";
 import Link from "next/link";
 export default async function NewPostPage() {
   const admin = createAdminClient();
-  const { data: categories } = await admin.from("categories").select("*").order("name");
-  const { data: tags } = await admin.from("tags").select("*").order("name");
+  const [{ data: categories }, { data: tags }] = await Promise.all([
+    admin.from("categories").select("*").order("name"),
+    admin.from("tags").select("*").order("name"),
+  ]);
 
   return (
     <div>

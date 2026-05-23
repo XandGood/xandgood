@@ -6,9 +6,11 @@ import { getTagsWithCount } from "@/lib/data/tags";
 import { getSiteSettings } from "@/lib/data/posts";
 
 export default async function Home() {
-  const settings = await getSiteSettings();
+  const [settings, tags] = await Promise.all([
+    getSiteSettings(),
+    getTagsWithCount(),
+  ]);
   const { posts } = await getPublishedPosts(1, settings?.posts_per_page || 10);
-  const tags = await getTagsWithCount();
   return (
     <div className="min-h-screen flex flex-col relative dark text-foreground selection:bg-purple-500/30 overflow-x-hidden">
       {/* Liquid Background orbs */}
@@ -83,7 +85,7 @@ export default async function Home() {
       {/* Footer */}
       <footer className="border-t border-white/5 mt-auto relative z-10 glass-liquid rounded-b-none rounded-t-[3rem]">
         <div className="max-w-7xl mx-auto flex items-center justify-center h-20 px-5 text-xs text-white/40">
-          <p>© 2026 Xandgood. All rights reserved.</p>
+          <p>© 2026 XandGood. All rights reserved.</p>
         </div>
       </footer>
     </div>

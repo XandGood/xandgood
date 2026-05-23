@@ -15,16 +15,28 @@ export function Comments({ postId }: { postId: string }) {
     const supabase = createClient();
     const { data } = await supabase
       .from("comments")
-      .select("*, profile:profiles(*)")
+      .select("*")
       .eq("post_id", postId)
       .eq("status", "approved")
       .order("created_at", { ascending: true });
 
-    if (data) {
-      const topLevel = data.filter((c: Comment) => !c.parent_id);
+    if (data && data.length > 0) {
+      const userIds = [...new Set(data.map((c: Comment) => c.user_id))];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("*")
+        .in("id", userIds);
+
+      const profileMap = new Map((profiles || []).map((p) => [p.id, p]));
+      const commentsWithProfiles = data.map((c: Comment) => ({
+        ...c,
+        profile: profileMap.get(c.user_id) as Profile | undefined,
+      }));
+
+      const topLevel = commentsWithProfiles.filter((c: Comment) => !c.parent_id);
       const withReplies = topLevel.map((c: Comment) => ({
         ...c,
-        replies: data.filter((r: Comment) => r.parent_id === c.id),
+        replies: commentsWithProfiles.filter((r: Comment) => r.parent_id === c.id),
       }));
       setComments(withReplies as Comment[]);
     }
@@ -47,12 +59,16 @@ export function Comments({ postId }: { postId: string }) {
 
     setLoading(true);
     try {
-      await supabase.from("comments").insert({
+      const { error } = await supabase.from("comments").insert({
         post_id: postId,
         user_id: currentUser.id,
         content: content.trim(),
         parent_id: replyTo,
       });
+      if (error) {
+        alert("评论提交失败：" + error.message);
+        return;
+      }
       setContent("");
       setReplyTo(null);
       alert("评论已提交，审核后可见");

@@ -5,19 +5,18 @@ import { Nav } from "@/components/nav";
 import { BlogCard } from "@/components/blog-card";
 import Link from "next/link";
 
-import { unstable_noStore as noStore } from "next/cache";
-
 export default async function BlogPage({
   searchParams,
 }: {
   searchParams: Promise<{ page?: string; category?: string }>;
 }) {
   const { page: pageStr, category } = await searchParams;
-  noStore();
   const page = parseInt(pageStr || "1", 10);
-  const { posts, total } = await getPublishedPosts(page, 10, category);
-  const categories = await getCategories();
-  const tags = await getTagsWithCount();
+  const [{ posts, total }, categories, tags] = await Promise.all([
+    getPublishedPosts(page, 10, category),
+    getCategories(),
+    getTagsWithCount(),
+  ]);
   const totalPages = Math.ceil(total / 10);
 
   return (
@@ -113,7 +112,7 @@ export default async function BlogPage({
 
       <footer className="border-t border-white/5 mt-auto relative z-10 glass-liquid rounded-b-none rounded-t-[3rem]">
         <div className="max-w-7xl mx-auto flex items-center justify-center h-20 px-5 text-xs text-white/40">
-          <p>© 2026 Xandgood. All rights reserved.</p>
+          <p>© 2026 XandGood. All rights reserved.</p>
         </div>
       </footer>
     </div>

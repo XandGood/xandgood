@@ -10,15 +10,27 @@ as $$
 declare
   claims jsonb;
   is_admin boolean;
+  is_banned boolean;
 begin
-  select p.is_admin into is_admin from public.profiles p where p.id = (event->>'user_id')::uuid;
+  select p.is_admin, p.is_banned into is_admin, is_banned
+  from public.profiles p where p.id = (event->>'user_id')::uuid;
 
-  if is_admin then
+  if is_admin or is_banned then
     claims := event->'claims';
     if jsonb_typeof(claims->'app_metadata') is null then
       claims := jsonb_set(claims, '{app_metadata}', '{}');
     end if;
+  end if;
+
+  if is_admin then
     claims := jsonb_set(claims, '{app_metadata,is_admin}', 'true');
+  end if;
+
+  if is_banned then
+    claims := jsonb_set(claims, '{app_metadata,is_banned}', 'true');
+  end if;
+
+  if is_admin or is_banned then
     event := jsonb_set(event, '{claims}', claims);
   end if;
 

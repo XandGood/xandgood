@@ -6,10 +6,7 @@ import { Comments } from "./comments";
 import Link from "next/link";
 import { Calendar, Tag } from "lucide-react";
 
-import { unstable_noStore as noStore } from "next/cache";
-
 export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {
-  noStore();
   const { slug } = await params;
   const post = await getPostBySlug(slug);
 
@@ -57,7 +54,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
             </div>
 
             <div className="border-t border-white/5 mt-8 pt-6">
-              <LikeButton postId={post.id} initialLiked={post.user_liked || false} initialCount={post.likes_count || 0} />
+              <LikeButton postId={post.id} initialCount={post.likes_count || 0} />
             </div>
           </div>
         </article>

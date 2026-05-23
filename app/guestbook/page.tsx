@@ -4,17 +4,30 @@ import { Nav } from "@/components/nav";
 import { MessageForm } from "./message-form";
 import { Pin } from "lucide-react";
 
-import { unstable_noStore as noStore } from "next/cache";
-
 export default async function GuestbookPage() {
-  noStore();
   const supabase = await createClient();
 
-  const { data: messages } = await supabase
+  const { data: messages, error } = await supabase
     .from("messages")
-    .select("*, profile:profiles(*)")
+    .select("*")
     .order("is_pinned", { ascending: false })
     .order("created_at", { ascending: false });
+
+  let messagesWithProfiles: (Message & { profile: Profile | null })[] = [];
+
+  if (messages && messages.length > 0) {
+    const userIds = [...new Set(messages.map((m) => m.user_id))];
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("*")
+      .in("id", userIds);
+
+    const profileMap = new Map((profiles || []).map((p) => [p.id, p]));
+    messagesWithProfiles = messages.map((m) => ({
+      ...m,
+      profile: profileMap.get(m.user_id) || null,
+    }));
+  }
 
   return (
     <div className="min-h-screen flex flex-col dark text-foreground">
@@ -31,7 +44,7 @@ export default async function GuestbookPage() {
         <MessageForm />
 
         <div className="flex flex-col gap-4 mt-8">
-          {(messages as (Message & { profile: Profile })[])?.map((msg) => (
+          {messagesWithProfiles.map((msg) => (
             <div key={msg.id} className="glass-liquid p-6">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-sm font-medium text-white/80">
@@ -47,7 +60,7 @@ export default async function GuestbookPage() {
               <p className="text-sm text-white/60">{msg.content}</p>
             </div>
           ))}
-          {(!messages || messages.length === 0) && (
+          {messagesWithProfiles.length === 0 && (
             <p className="text-white/30 text-sm">暂无留言</p>
           )}
         </div>
@@ -55,7 +68,7 @@ export default async function GuestbookPage() {
 
       <footer className="border-t border-white/5 mt-auto relative z-10 glass-liquid rounded-b-none rounded-t-[3rem]">
         <div className="max-w-7xl mx-auto flex items-center justify-center h-20 px-5 text-xs text-white/40">
-          <p>© 2026 Xandgood. All rights reserved.</p>
+          <p>© 2026 XandGood. All rights reserved.</p>
         </div>
       </footer>
     </div>

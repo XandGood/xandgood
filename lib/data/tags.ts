@@ -12,16 +12,15 @@ export async function getTags(): Promise<Tag[]> {
 
 export async function getTagsWithCount() {
   const supabase = await createClient();
-  const { data: tags } = await supabase.from("tags").select("*").order("name");
+  const { data: tags } = await supabase
+    .from("tags")
+    .select("*, post_tags(count)")
+    .order("name");
+
   if (!tags) return [];
 
-  const result = [];
-  for (const tag of tags) {
-    const { count } = await supabase
-      .from("post_tags")
-      .select("*", { count: "exact", head: true })
-      .eq("tag_id", tag.id);
-    result.push({ ...tag, count: count || 0 });
-  }
-  return result;
+  return tags.map((tag: Record<string, unknown>) => ({
+    ...tag,
+    count: (tag.post_tags as Array<{ count: number }>)?.[0]?.count || 0,
+  })) as Tag[];
 }

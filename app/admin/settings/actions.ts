@@ -1,18 +1,13 @@
 "use server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
+import { adminAction } from "@/lib/admin-action";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-export async function updateSettings(formData: FormData) {
-  const supabase = await createClient();
-  const { data: claimsData } = await supabase.auth.getClaims();
-  if (!claimsData?.claims) redirect("/auth/login");
-  if (claimsData?.claims?.app_metadata?.is_admin !== true) redirect("/");
-
+export const updateSettings = adminAction("updateSettings", async (formData) => {
   const admin = createAdminClient();
-  await admin
+  const { error } = await admin
     .from("site_settings")
     .update({
       blog_name: formData.get("blog_name") as string,
@@ -21,8 +16,9 @@ export async function updateSettings(formData: FormData) {
       posts_per_page: parseInt(formData.get("posts_per_page") as string, 10),
     })
     .eq("id", 1);
+  if (error) throw error;
 
   revalidatePath("/");
   revalidatePath("/blog");
   redirect("/admin/settings");
-}
+});

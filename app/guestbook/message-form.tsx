@@ -24,10 +24,14 @@ export function MessageForm() {
 
     setLoading(true);
     try {
-      await supabase.from("messages").insert({
+      const { error } = await supabase.from("messages").insert({
         user_id: currentUser.id,
         content: content.trim(),
       });
+      if (error) {
+        alert("留言发布失败：" + error.message);
+        return;
+      }
       setContent("");
       window.location.reload();
     } finally {

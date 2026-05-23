@@ -1,37 +1,29 @@
 "use server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
+import { adminAction } from "@/lib/admin-action";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-export async function deleteMessage(formData: FormData) {
-  const supabase = await createClient();
-  const { data: claimsData } = await supabase.auth.getClaims();
-  if (!claimsData?.claims) redirect("/auth/login");
-  if (claimsData?.claims?.app_metadata?.is_admin !== true) redirect("/");
-
+export const deleteMessage = adminAction("deleteMessage", async (formData) => {
   const admin = createAdminClient();
-  await admin.from("messages").delete().eq("id", formData.get("id") as string);
+  const { error } = await admin.from("messages").delete().eq("id", formData.get("id") as string);
+  if (error) throw error;
 
   revalidatePath("/admin/messages");
   revalidatePath("/guestbook");
   redirect("/admin/messages");
-}
+});
 
-export async function togglePinMessage(formData: FormData) {
-  const supabase = await createClient();
-  const { data: claimsData } = await supabase.auth.getClaims();
-  if (!claimsData?.claims) redirect("/auth/login");
-  if (claimsData?.claims?.app_metadata?.is_admin !== true) redirect("/");
-
+export const togglePinMessage = adminAction("togglePinMessage", async (formData) => {
   const admin = createAdminClient();
   const id = formData.get("id") as string;
   const isPinned = formData.get("is_pinned") === "true";
 
-  await admin.from("messages").update({ is_pinned: !isPinned }).eq("id", id);
+  const { error } = await admin.from("messages").update({ is_pinned: !isPinned }).eq("id", id);
+  if (error) throw error;
 
   revalidatePath("/admin/messages");
   revalidatePath("/guestbook");
   redirect("/admin/messages");
-}
+});

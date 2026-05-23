@@ -27,6 +27,7 @@ export type Tag = {
   name: string;
   slug: string;
   created_at: string;
+  count?: number;
 };
 
 export type PostTag = {

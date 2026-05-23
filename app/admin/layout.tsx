@@ -1,7 +1,7 @@
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/admin-guard";
 import Link from "next/link";
 import { LogoutButton } from "@/components/logout-button";
+import { AdminErrorToast } from "@/components/admin-error-toast";
 import { FileText, FolderOpen, Tag, MessageSquare, BookOpen, Users, Settings } from "lucide-react";
 const navItems = [
   { href: "/admin/posts", label: "文章管理", icon: FileText },
@@ -18,14 +18,7 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createClient();
-  const { data: claimsData } = await supabase.auth.getClaims();
-
-  if (!claimsData?.claims) redirect("/auth/login");
-
-  if (claimsData?.claims?.app_metadata?.is_admin !== true) {
-    redirect("/");
-  }
+  await requireAdmin();
 
   return (
     <div className="min-h-screen flex dark text-foreground">
@@ -55,6 +48,7 @@ export default async function AdminLayout({
       <main className="flex-1 p-8">
         {children}
       </main>
+      <AdminErrorToast />
     </div>
   );
 }
