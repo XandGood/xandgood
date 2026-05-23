@@ -10,6 +10,7 @@ export default async function GuestbookPage() {
   const { data: messages, error } = await supabase
     .from("messages")
     .select("*")
+    .eq("status", "approved")
     .order("is_pinned", { ascending: false })
     .order("created_at", { ascending: false });
 

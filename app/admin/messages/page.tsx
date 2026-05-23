@@ -11,7 +11,7 @@ export default async function AdminMessagesPage() {
   if (error || !messages) {
     return (
       <div>
-        <h1 className="text-2xl font-bold text-white mb-6">留言管理</h1>
+        <h1 className="text-2xl font-bold text-white mb-6">留言审核</h1>
         <p className="text-white/40">加载留言失败：{error?.message || "未知错误"}</p>
       </div>
     );
@@ -31,7 +31,7 @@ export default async function AdminMessagesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-white mb-6">留言管理</h1>
+      <h1 className="text-2xl font-bold text-white mb-6">留言审核</h1>
       <MessagesClient messages={messagesWithProfiles} />
     </div>
   );

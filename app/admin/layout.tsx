@@ -8,7 +8,7 @@ const navItems = [
   { href: "/admin/categories", label: "分类管理", icon: FolderOpen },
   { href: "/admin/tags", label: "标签管理", icon: Tag },
   { href: "/admin/comments", label: "评论审核", icon: MessageSquare },
-  { href: "/admin/messages", label: "留言管理", icon: BookOpen },
+  { href: "/admin/messages", label: "留言审核", icon: BookOpen },
   { href: "/admin/users", label: "用户管理", icon: Users },
   { href: "/admin/settings", label: "站点设置", icon: Settings },
 ];

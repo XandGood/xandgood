@@ -59,6 +59,7 @@ export type Message = {
   user_id: string;
   content: string;
   is_pinned: boolean;
+  status: "pending" | "approved" | "rejected";
   created_at: string;
   profile?: Profile;
 };

@@ -33,7 +33,7 @@ export function MessageForm() {
         return;
       }
       setContent("");
-      window.location.reload();
+      alert("留言已提交，审核后可见");
     } finally {
       setLoading(false);
     }
