@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useToast } from "@/components/toaster";
 
 export function MessageForm() {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<ReturnType<typeof createClient>["auth"] extends { getUser(): Promise<{ data: { user: infer U } }> } ? U : never>(null as never);
+  const { success, error: showError } = useToast();
 
   const supabase = createClient();
 
@@ -29,11 +31,11 @@ export function MessageForm() {
         content: content.trim(),
       });
       if (error) {
-        alert("留言发布失败：" + error.message);
+        showError("留言发布失败：" + error.message);
         return;
       }
       setContent("");
-      alert("留言已提交，审核后可见");
+      success("留言已提交，审核后可见");
     } finally {
       setLoading(false);
     }

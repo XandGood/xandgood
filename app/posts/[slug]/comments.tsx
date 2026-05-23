@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useToast } from "@/components/toaster";
 import type { Comment, Profile } from "@/lib/types";
 
 export function Comments({ postId }: { postId: string }) {
@@ -10,6 +11,7 @@ export function Comments({ postId }: { postId: string }) {
   const [replyTo, setReplyTo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<ReturnType<typeof createClient>["auth"] extends { getUser(): Promise<{ data: { user: infer U } }> } ? U : never>(null as never);
+  const { success, error: showError } = useToast();
 
   const loadComments = useCallback(async () => {
     const supabase = createClient();
@@ -66,12 +68,12 @@ export function Comments({ postId }: { postId: string }) {
         parent_id: replyTo,
       });
       if (error) {
-        alert("评论提交失败：" + error.message);
+        showError("评论提交失败：" + error.message);
         return;
       }
       setContent("");
       setReplyTo(null);
-      alert("评论已提交，审核后可见");
+      success("评论已提交，审核后可见");
     } finally {
       setLoading(false);
     }
