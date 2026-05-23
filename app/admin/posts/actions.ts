@@ -9,7 +9,7 @@ function slugify(text: string) {
   return text
     .toLowerCase()
     .replace(/[\s]+/g, "-")
-    .replace(/[^\w\u4e00-\u9fa5-]/g, "")
+    .replace(/[^a-z0-9-]/g, "")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
 }
@@ -88,5 +88,27 @@ export const deletePost = adminAction("deletePost", async (formData) => {
 
   revalidatePath("/blog");
   revalidatePath("/");
+  redirect("/admin/posts");
+});
+
+export const togglePostStatus = adminAction("togglePostStatus", async (formData) => {
+  const admin = createAdminClient();
+  const id = formData.get("id") as string;
+  const currentStatus = formData.get("current_status") as string;
+  const newStatus = currentStatus === "published" ? "draft" : "published";
+
+  const { error } = await admin
+    .from("posts")
+    .update({
+      status: newStatus,
+      published_at: newStatus === "published" ? new Date().toISOString() : null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id);
+  if (error) throw error;
+
+  revalidatePath("/blog");
+  revalidatePath("/");
+  revalidatePath("/admin/posts");
   redirect("/admin/posts");
 });

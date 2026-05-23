@@ -1,8 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { createPost } from "../actions";
+import { MarkdownEditor } from "@/components/markdown-editor";
 
 export function NewPostClient({ categories, tags }: { categories: { id: string; name: string }[]; tags: { id: string; name: string }[] }) {
+  const [content, setContent] = useState("");
+
   return (
     <form action={createPost} className="glass-liquid p-8 flex flex-col gap-5">
       <div>
@@ -14,8 +18,8 @@ export function NewPostClient({ categories, tags }: { categories: { id: string; 
         <input name="summary" type="text" className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-purple-500/50" />
       </div>
       <div>
-        <label className="text-sm text-white/60 mb-1 block">正文（Markdown）</label>
-        <textarea name="content" rows={15} required className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-purple-500/50 resize-none font-mono" />
+        <label className="text-sm text-white/60 mb-2 block">正文（Markdown）</label>
+        <MarkdownEditor name="content" value={content} onChange={setContent} required />
       </div>
       <div>
         <label className="text-sm text-white/60 mb-1 block">分类</label>

@@ -1,8 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { updatePost } from "../../actions";
+import { MarkdownEditor } from "@/components/markdown-editor";
 
 export function EditPostClient({ post, categories, tags, selectedTagIds }: { post: { id: string; title: string; slug: string; content: string; summary: string; category_id: string | null; status: string }; categories: { id: string; name: string }[]; tags: { id: string; name: string }[]; selectedTagIds: Set<string> }) {
+  const [content, setContent] = useState(post.content);
+
   return (
     <form action={updatePost} className="glass-liquid p-8 flex flex-col gap-5">
       <input type="hidden" name="id" value={post.id} />
@@ -16,8 +20,8 @@ export function EditPostClient({ post, categories, tags, selectedTagIds }: { pos
         <input name="summary" type="text" defaultValue={post.summary} className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-purple-500/50" />
       </div>
       <div>
-        <label className="text-sm text-white/60 mb-1 block">正文（Markdown）</label>
-        <textarea name="content" rows={15} required defaultValue={post.content} className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-purple-500/50 resize-none font-mono" />
+        <label className="text-sm text-white/60 mb-2 block">正文（Markdown）</label>
+        <MarkdownEditor name="content" value={content} onChange={setContent} required />
       </div>
       <div>
         <label className="text-sm text-white/60 mb-1 block">分类</label>

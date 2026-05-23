@@ -83,3 +83,11 @@
     @apply bg-white/[0.02] backdrop-blur-2xl border border-white/[0.05] shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_8px_32px_rgba(0,0,0,0.3)] rounded-full transition-all duration-500;
   }
 }
+
+/* 代码块 IDE 风格 */
+pre code.hljs {
+  font-family: "Cascadia Code", "Fira Code", "JetBrains Mono", Consolas, monospace;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  border-radius: 0.5rem;
+}

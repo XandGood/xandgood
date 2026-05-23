@@ -40,7 +40,7 @@ export async function getPostBySlug(slug: string) {
 
   const { data: post, error } = await supabase
     .from("posts")
-    .select("*, category:categories(*), post_tags(tag:tags(*)), likes(count)")
+    .select("*, category:categories(*), post_tags(tag:tags(*))")
     .eq("slug", slug)
     .eq("status", "published")
     .single();
@@ -52,13 +52,10 @@ export async function getPostBySlug(slug: string) {
     .map((pt) => pt.tag)
     .filter(Boolean);
 
-  const likesData = raw.likes as Array<{ count: number }> | undefined;
-  const likes_count = likesData?.[0]?.count || 0;
-
   return {
     ...post,
     tags,
-    likes_count,
+    likes_count: 0,
     user_liked: false,
   } as Post;
 }
