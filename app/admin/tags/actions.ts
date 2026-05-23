@@ -6,7 +6,12 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 function slugify(text: string) {
-  return text.toLowerCase().replace(/[\s]+/g, "-").replace(/[^\w\u4e00-\u9fa5-]/g, "").replace(/-+/g, "-").replace(/^-|-$/g, "");
+  return text
+    .toLowerCase()
+    .replace(/[\s]+/g, "-")
+    .replace(/[^a-z0-9-]/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 export const createTag = adminAction("createTag", async (formData) => {

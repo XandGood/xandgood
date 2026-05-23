@@ -10,13 +10,14 @@ export default async function Home({
 }: {
   searchParams: Promise<{ page?: string; category?: string }>;
 }) {
-  const { category: categoryId } = await searchParams;
-  const [{ posts }, tags, categories] = await Promise.all([
-    getPublishedPosts(1, 10, categoryId),
+  const { category: categoryId, page: pageStr } = await searchParams;
+  const page = parseInt(pageStr || "1", 10);
+  const [{ posts, total }, tags, categories] = await Promise.all([
+    getPublishedPosts(page, 10, categoryId),
     getTagsWithCount(),
     getCategories(),
   ]);
-
+  const totalPages = Math.ceil(total / 10);
   return (
     <main className="flex-1 max-w-7xl mx-auto w-full px-5 pt-32 pb-20">
       <div className="flex gap-8">
@@ -42,17 +43,27 @@ export default async function Home({
             <p className="text-white/40 text-sm">暂无文章</p>
           )}
 
-          <div className="flex items-center justify-center gap-4 mt-12">
-            <button className="glass-pill px-5 py-2 text-xs text-white/60 hover:text-white hover:bg-white/[0.05] hover:shadow-[0_0_15px_rgba(255,255,255,0.1)]">
-              上一页
-            </button>
-            <span className="glass-pill px-4 py-2 text-xs text-white/90">
-              1
-            </span>
-            <button className="glass-pill px-5 py-2 text-xs text-white/60 hover:text-white hover:bg-white/[0.05] hover:shadow-[0_0_15px_rgba(255,255,255,0.1)]">
-              下一页
-            </button>
-          </div>
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-4 mt-12">
+              {page > 1 && (
+                <Link
+                  href={`/?page=${page - 1}${categoryId ? `&category=${categoryId}` : ""}`}
+                  className="glass-pill px-5 py-2 text-xs text-white/60 hover:text-white hover:bg-white/[0.05]"
+                >
+                  上一页
+                </Link>
+              )}
+              <span className="glass-pill px-4 py-2 text-xs text-white/90">{page}</span>
+              {page < totalPages && (
+                <Link
+                  href={`/?page=${page + 1}${categoryId ? `&category=${categoryId}` : ""}`}
+                  className="glass-pill px-5 py-2 text-xs text-white/60 hover:text-white hover:bg-white/[0.05]"
+                >
+                  下一页
+                </Link>
+              )}
+            </div>
+          )}
         </div>
 
         <aside className="hidden lg:block w-64 shrink-0">

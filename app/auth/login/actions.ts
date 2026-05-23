@@ -6,16 +6,12 @@ import { redirect } from "next/navigation";
 export async function login(formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
-  const remember = formData.get("remember") as string;
 
   const supabase = await createClient();
 
   const { error } = await supabase.auth.signInWithPassword({
     email,
     password,
-    options: {
-      ...(remember === "on" ? {} : {}),
-    },
   });
 
   if (error) {
@@ -23,5 +19,6 @@ export async function login(formData: FormData) {
   }
 
   const next = (formData.get("next") as string) || "/";
-  redirect(next);
+  const safeNext = /^\/(?!\/)/.test(next) ? next : "/";
+  redirect(safeNext);
 }

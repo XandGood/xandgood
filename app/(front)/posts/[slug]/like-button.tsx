@@ -14,14 +14,12 @@ export function LikeButton({
   const [liked, setLiked] = useState(false);
   const [count, setCount] = useState(initialCount);
   const [loading, setLoading] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const supabase = createClient();
     supabase.auth.getUser().then(({ data }) => {
       const user = data.user;
       if (!user) return;
-      setUserId(user.id);
       supabase
         .from("likes")
         .select("*", { count: "exact", head: true })

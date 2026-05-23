@@ -1,6 +1,7 @@
 import { requireAdmin } from "./admin-guard";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 
 export function adminAction(
   name: string,
@@ -34,14 +35,4 @@ export function adminAction(
       redirect("/admin");
     }
   };
-}
-
-function isRedirectError(e: unknown): boolean {
-  return (
-    typeof e === "object" &&
-    e !== null &&
-    "digest" in e &&
-    typeof (e as Record<string, unknown>).digest === "string" &&
-    ((e as Record<string, unknown>).digest as string).startsWith("NEXT_REDIRECT")
-  );
 }

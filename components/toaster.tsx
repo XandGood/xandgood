@@ -25,6 +25,8 @@ export function useToast() {
   return ctx;
 }
 
+let toastIdCounter = 0;
+
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
@@ -33,7 +35,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const add = useCallback((message: string, type: ToastType) => {
-    const id = Math.random().toString(36).slice(2);
+    const id = String(++toastIdCounter);
     setToasts((prev) => [...prev, { id, message, type }]);
     setTimeout(() => remove(id), 3500);
   }, [remove]);

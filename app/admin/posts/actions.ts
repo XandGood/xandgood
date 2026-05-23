@@ -66,12 +66,22 @@ export const updatePost = adminAction("updatePost", async (formData) => {
     .eq("id", id);
   if (error) throw error;
 
-  const { error: delError } = await admin.from("post_tags").delete().eq("post_id", id);
-  if (delError) throw delError;
+  const { data: existingTags } = await admin.from("post_tags").select("tag_id").eq("post_id", id);
+  const existingIds = (existingTags || []).map((r) => r.tag_id);
 
-  if (tagIds.length > 0) {
-    const { error: tagError } = await admin.from("post_tags").insert(tagIds.map((tag_id) => ({ post_id: id, tag_id })));
-    if (tagError) throw tagError;
+  const toAdd = tagIds.filter((tid) => !existingIds.includes(tid));
+  const toRemove = existingIds.filter((tid) => !tagIds.includes(tid));
+
+  if (toAdd.length > 0) {
+    const { error: insertError } = await admin.from("post_tags").insert(
+      toAdd.map((tag_id) => ({ post_id: id, tag_id }))
+    );
+    if (insertError) throw insertError;
+  }
+
+  if (toRemove.length > 0) {
+    const { error: delError } = await admin.from("post_tags").delete().eq("post_id", id).in("tag_id", toRemove);
+    if (delError) throw delError;
   }
 
   revalidatePath("/blog");

@@ -52,11 +52,27 @@ export async function getPostBySlug(slug: string) {
     .map((pt) => pt.tag)
     .filter(Boolean);
 
+  const { count: likesCount } = await supabase
+    .from("likes")
+    .select("*", { count: "exact", head: true })
+    .eq("post_id", raw.id as string);
+
+  const { data: { user } } = await supabase.auth.getUser();
+  let userLiked = false;
+  if (user) {
+    const { count } = await supabase
+      .from("likes")
+      .select("*", { count: "exact", head: true })
+      .eq("post_id", raw.id as string)
+      .eq("user_id", user.id);
+    userLiked = (count || 0) > 0;
+  }
+
   return {
     ...post,
     tags,
-    likes_count: 0,
-    user_liked: false,
+    likes_count: likesCount || 0,
+    user_liked: userLiked,
   } as Post;
 }
 

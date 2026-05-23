@@ -40,11 +40,7 @@ export default async function LoginPage({
                 className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-purple-500/50"
               />
             </div>
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 text-sm text-white/60">
-                <input name="remember" type="checkbox" className="accent-purple-500" />
-                记住我
-              </label>
+            <div className="flex items-center justify-end">
               <Link href="/auth/forgot-password" className="text-sm text-purple-400 hover:text-purple-300">
                 忘记密码？
               </Link>
