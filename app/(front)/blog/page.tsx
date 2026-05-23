@@ -66,35 +66,48 @@ export default async function BlogPage({
         </div>
 
         <aside className="hidden lg:block w-64 shrink-0">
-          <div className="sticky top-32 glass-liquid p-6 mb-6">
-            <h3 className="text-xs font-semibold tracking-widest text-white/50 uppercase mb-4">分类</h3>
-            <div className="flex flex-col gap-2">
-              <Link href="/blog" className="text-sm text-white/60 hover:text-white transition-colors">
-                全部
-              </Link>
-              {categories.map((cat) => (
+          <div className="sticky top-32 flex flex-col gap-6">
+            <div className="glass-liquid p-6">
+              <h3 className="text-xs font-semibold tracking-widest text-white/50 uppercase mb-4">分类</h3>
+              <div className="flex flex-wrap gap-2">
                 <Link
-                  key={cat.id}
-                  href={`/blog?category=${cat.id}`}
-                  className="text-sm text-white/60 hover:text-white transition-colors"
+                  href="/blog"
+                  className={`px-4 py-2 rounded-full text-xs border transition-colors ${
+                    !category
+                      ? "bg-purple-600/20 border-purple-500/30 text-purple-300"
+                      : "bg-white/5 border-white/10 text-white/50 hover:bg-white/10 hover:text-white/70"
+                  }`}
                 >
-                  {cat.name}
+                  全部
                 </Link>
-              ))}
+                {categories.map((cat) => (
+                  <Link
+                    key={cat.id}
+                    href={`/blog?category=${cat.id}`}
+                    className={`px-4 py-2 rounded-full text-xs border transition-colors ${
+                      category === cat.id
+                        ? "bg-purple-600/20 border-purple-500/30 text-purple-300"
+                        : "bg-white/5 border-white/10 text-white/50 hover:bg-white/10 hover:text-white/70"
+                    }`}
+                  >
+                    {cat.name}
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
-          <div className="sticky top-[calc(32px+200px)] glass-liquid p-6">
-            <h3 className="text-xs font-semibold tracking-widest text-white/50 uppercase mb-4">标签</h3>
-            <div className="flex flex-wrap gap-3">
-              {tags.map((tag) => (
-                <button
-                  key={tag.id}
-                  className="glass-pill px-4 py-2 text-[11px] text-white/70 hover:text-white hover:bg-white/[0.08] flex items-center gap-2"
-                >
-                  {tag.name}
-                  <span className="w-4 h-4 flex items-center justify-center rounded-full bg-white/10 text-[9px]">{tag.count}</span>
-                </button>
-              ))}
+            <div className="glass-liquid p-6">
+              <h3 className="text-xs font-semibold tracking-widest text-white/50 uppercase mb-4">标签</h3>
+              <div className="flex flex-wrap gap-2">
+                {tags.map((tag) => (
+                  <span
+                    key={tag.id}
+                    className="px-4 py-2 rounded-full text-[11px] border bg-white/5 border-white/10 text-white/50 flex items-center gap-2"
+                  >
+                    {tag.name}
+                    <span className="w-4 h-4 flex items-center justify-center rounded-full bg-white/10 text-[9px]">{tag.count}</span>
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
         </aside>

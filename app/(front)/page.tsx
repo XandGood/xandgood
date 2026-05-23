@@ -2,14 +2,21 @@ import { Hero } from "@/components/hero";
 import { BlogCard } from "@/components/blog-card";
 import { getPublishedPosts } from "@/lib/data/posts";
 import { getTagsWithCount } from "@/lib/data/tags";
-import { getSiteSettings } from "@/lib/data/posts";
+import { getCategories } from "@/lib/data/categories";
+import Link from "next/link";
 
-export default async function Home() {
-  const [settings, tags] = await Promise.all([
-    getSiteSettings(),
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; category?: string }>;
+}) {
+  const { category: categoryId } = await searchParams;
+  const [{ posts }, tags, categories] = await Promise.all([
+    getPublishedPosts(1, 10, categoryId),
     getTagsWithCount(),
+    getCategories(),
   ]);
-  const { posts } = await getPublishedPosts(1, settings?.posts_per_page || 10);
+
   return (
     <main className="flex-1 max-w-7xl mx-auto w-full px-5 pt-32 pb-20">
       <div className="flex gap-8">
@@ -31,6 +38,10 @@ export default async function Home() {
             ))}
           </div>
 
+          {posts.length === 0 && (
+            <p className="text-white/40 text-sm">暂无文章</p>
+          )}
+
           <div className="flex items-center justify-center gap-4 mt-12">
             <button className="glass-pill px-5 py-2 text-xs text-white/60 hover:text-white hover:bg-white/[0.05] hover:shadow-[0_0_15px_rgba(255,255,255,0.1)]">
               上一页
@@ -45,18 +56,48 @@ export default async function Home() {
         </div>
 
         <aside className="hidden lg:block w-64 shrink-0">
-          <div className="sticky top-32 glass-liquid p-6">
-            <h3 className="text-xs font-semibold tracking-widest text-white/50 uppercase mb-6">标签气泡</h3>
-            <div className="flex flex-wrap gap-3">
-              {tags.map((tag) => (
-                <button
-                  key={tag.id}
-                  className="glass-pill px-4 py-2 text-[11px] text-white/70 hover:text-white hover:bg-white/[0.08] hover:shadow-[0_0_10px_rgba(255,255,255,0.2)] flex items-center gap-2"
+          <div className="sticky top-32 flex flex-col gap-6">
+            <div className="glass-liquid p-6">
+              <h3 className="text-xs font-semibold tracking-widest text-white/50 uppercase mb-4">分类</h3>
+              <div className="flex flex-wrap gap-2">
+                <Link
+                  href="/"
+                  className={`px-4 py-2 rounded-full text-xs border transition-colors ${
+                    !categoryId
+                      ? "bg-purple-600/20 border-purple-500/30 text-purple-300"
+                      : "bg-white/5 border-white/10 text-white/50 hover:bg-white/10 hover:text-white/70"
+                  }`}
                 >
-                  {tag.name}
-                  <span className="w-4 h-4 flex items-center justify-center rounded-full bg-white/10 text-[9px]">{tag.count}</span>
-                </button>
-              ))}
+                  全部
+                </Link>
+                {categories.map((cat) => (
+                  <Link
+                    key={cat.id}
+                    href={`/?category=${cat.id}`}
+                    className={`px-4 py-2 rounded-full text-xs border transition-colors ${
+                      categoryId === cat.id
+                        ? "bg-purple-600/20 border-purple-500/30 text-purple-300"
+                        : "bg-white/5 border-white/10 text-white/50 hover:bg-white/10 hover:text-white/70"
+                    }`}
+                  >
+                    {cat.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+            <div className="glass-liquid p-6">
+              <h3 className="text-xs font-semibold tracking-widest text-white/50 uppercase mb-4">标签</h3>
+              <div className="flex flex-wrap gap-2">
+                {tags.map((tag) => (
+                  <span
+                    key={tag.id}
+                    className="px-4 py-2 rounded-full text-[11px] border bg-white/5 border-white/10 text-white/50 flex items-center gap-2"
+                  >
+                    {tag.name}
+                    <span className="w-4 h-4 flex items-center justify-center rounded-full bg-white/10 text-[9px]">{tag.count}</span>
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
         </aside>
