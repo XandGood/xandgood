@@ -1,25 +1,42 @@
 "use client";
 
 import Link from "next/link";
-import { useTheme } from "next-themes";
-import { Moon, Sun, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import { logout } from "@/app/auth/actions";
 
+function parseJwt(token: string) {
+  try {
+    return JSON.parse(atob(token.split(".")[1]));
+  } catch {
+    return {};
+  }
+}
+
 export function Nav() {
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
     const supabase = createClient();
     supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session?.access_token) {
+        const claims = parseJwt(data.session.access_token);
+        setIsAdmin(claims.app_metadata?.is_admin === true);
+      }
+    });
     const { data: listener } = supabase.auth.onAuthStateChange((_e, session) => {
       setUser(session?.user ?? null);
+      if (session?.access_token) {
+        const claims = parseJwt(session.access_token);
+        setIsAdmin(claims.app_metadata?.is_admin === true);
+      } else {
+        setIsAdmin(false);
+      }
     });
     return () => listener.subscription.unsubscribe();
   }, []);
@@ -34,25 +51,12 @@ export function Nav() {
         <Link href="/" className="text-sm text-white/60 hover:text-white transition-colors">首页</Link>
         <Link href="/blog" className="text-sm text-white/60 hover:text-white transition-colors">文章</Link>
         <Link href="/guestbook" className="text-sm text-white/60 hover:text-white transition-colors">留言板</Link>
-        {mounted && (
-          <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="glass rounded-full p-1.5 transition-all duration-300 hover:scale-110 hover:bg-foreground/10"
-            aria-label="切换主题"
-          >
-            {theme === "dark" ? (
-              <Sun className="h-4 w-4 text-foreground/70" />
-            ) : (
-              <Moon className="h-4 w-4 text-foreground/70" />
-            )}
-          </button>
-        )}
         {user ? (
           <div className="flex items-center gap-4">
             <Link href="/profile" className="text-sm text-white/60 hover:text-white transition-colors">
               个人中心
             </Link>
-            {user.app_metadata?.is_admin === true && (
+            {isAdmin && (
               <Link href="/admin" className="text-sm text-purple-400 hover:text-purple-300 transition-colors">
                 后台
               </Link>
@@ -82,7 +86,7 @@ export function Nav() {
           {user ? (
             <>
               <Link href="/profile" className="text-sm text-white/60 hover:text-white" onClick={() => setMenuOpen(false)}>个人中心</Link>
-              {user.app_metadata?.is_admin === true && (
+              {isAdmin && (
                 <Link href="/admin" className="text-sm text-purple-400" onClick={() => setMenuOpen(false)}>后台</Link>
               )}
               <form action={logout}><button type="submit" className="text-sm text-white/40 hover:text-white/70">退出</button></form>
