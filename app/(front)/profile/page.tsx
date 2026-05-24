@@ -19,7 +19,7 @@ export default async function ProfilePage() {
     <main className="flex-1 max-w-3xl mx-auto w-full px-5 pt-32 pb-20">
       <h1 className="text-3xl font-bold text-white mb-8">个人中心</h1>
 
-      <div className="glass-liquid p-8 mb-6">
+      <div className="glass-liquid p-6 sm:p-8 mb-6">
         <h2 className="text-lg font-bold text-white mb-4">基本信息</h2>
         <ProfileForm
           displayName={profile?.display_name || ""}
@@ -27,7 +27,7 @@ export default async function ProfilePage() {
         />
       </div>
 
-      <div className="glass-liquid p-8 mb-6">
+      <div className="glass-liquid p-6 sm:p-8 mb-6">
         <h2 className="text-lg font-bold text-white mb-4">我的评论</h2>
         <div className="flex flex-col gap-3">
           {(comments as (Comment & { post: Post })[])?.map((c) => (
@@ -52,7 +52,7 @@ export default async function ProfilePage() {
         </div>
       </div>
 
-      <div className="glass-liquid p-8">
+      <div className="glass-liquid p-6 sm:p-8">
         <h2 className="text-lg font-bold text-white mb-4">我的点赞</h2>
         <div className="flex flex-col gap-3">
           {(likes as (Like & { post: Post })[])?.map((l) => (

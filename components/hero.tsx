@@ -5,7 +5,7 @@ interface HeroProps {
 
 export function Hero({ postCount, viewCount }: HeroProps) {
   return (
-    <section className="relative flex items-end justify-between gap-8 pt-6 pb-12">
+    <section className="relative flex flex-col sm:flex-row items-start sm:items-end justify-between gap-6 sm:gap-8 pt-6 pb-12">
       <div className="flex flex-col gap-4 relative z-10">
         <h1 className="text-5xl lg:text-7xl font-black tracking-tight text-white mb-2 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
           XandGood

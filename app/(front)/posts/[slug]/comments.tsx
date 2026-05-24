@@ -80,7 +80,7 @@ export function Comments({ postId }: { postId: string }) {
   };
 
   return (
-    <div className="glass-liquid p-8">
+    <div className="glass-liquid p-5 sm:p-8">
       <h3 className="text-lg font-bold text-white mb-6">评论</h3>
 
       {user ? (
