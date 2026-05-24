@@ -20,9 +20,39 @@ export default async function Home({
   const totalPages = Math.ceil(total / 10);
   return (
     <main className="flex-1 max-w-7xl mx-auto w-full px-5 pt-32 pb-20">
-      <div className="flex gap-8">
-        <div className="flex-1 min-w-0">
+      <div className="flex gap-8 flex-col lg:flex-row">
+        <div className="lg:flex-1 min-w-0">
           <Hero postCount={posts.length} viewCount={`${posts.length}`} />
+
+          <div className="glass-liquid p-5 mb-8 lg:hidden">
+            <h3 className="text-xs font-semibold tracking-widest text-white/50 uppercase mb-3">分类</h3>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href="/"
+                className={`px-4 py-2 rounded-full text-xs border transition-colors ${
+                  !categoryId
+                    ? "bg-purple-600/20 border-purple-500/30 text-purple-300"
+                    : "bg-white/5 border-white/10 text-white/50 hover:bg-white/10 hover:text-white/70"
+                }`}
+              >
+                全部
+              </Link>
+              {categories.map((cat) => (
+                <Link
+                  key={cat.id}
+                  href={`/?category=${cat.id}`}
+                  className={`px-4 py-2 rounded-full text-xs border transition-colors ${
+                    categoryId === cat.id
+                      ? "bg-purple-600/20 border-purple-500/30 text-purple-300"
+                      : "bg-white/5 border-white/10 text-white/50 hover:bg-white/10 hover:text-white/70"
+                  }`}
+                >
+                  {cat.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+
           <h2 className="text-sm font-medium text-muted-foreground mb-6">文章</h2>
 
           <div className="flex flex-col gap-4">
