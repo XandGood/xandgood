@@ -1,23 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/toaster";
+import type { User } from "@supabase/supabase-js";
 
 export function MessageForm() {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState<ReturnType<typeof createClient>["auth"] extends { getUser(): Promise<{ data: { user: infer U } }> } ? U : never>(null as never);
+  const [user, setUser] = useState<User | null>(null);
   const { success, error: showError } = useToast();
 
-  const supabase = createClient();
-
-  useState(() => {
+  useEffect(() => {
+    const supabase = createClient();
     supabase.auth.getUser().then(({ data }) => setUser(data.user));
-  });
+  }, []);
 
   const handleSubmit = async () => {
     if (!content.trim()) return;
+    const supabase = createClient();
     const { data: { user: currentUser } } = await supabase.auth.getUser();
     if (!currentUser) {
       window.location.href = "/auth/login";

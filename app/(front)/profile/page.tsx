@@ -9,6 +9,11 @@ export default async function ProfilePage() {
 
   if (!user) redirect("/auth/login");
 
+  const { data: claimsData } = await supabase.auth.getClaims();
+  if (claimsData?.claims?.app_metadata?.is_banned === true) {
+    redirect("/auth/login");
+  }
+
   const [{ data: profile }, { data: comments }, { data: likes }] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).single(),
     supabase.from("comments").select("*, post:posts(id, title, slug)").eq("user_id", user.id).order("created_at", { ascending: false }).limit(20),

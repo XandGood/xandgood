@@ -38,12 +38,18 @@ export async function getPublishedPosts(
 export async function getPostBySlug(slug: string) {
   const supabase = await createClient();
 
-  const { data: post, error } = await supabase
-    .from("posts")
-    .select("*, category:categories(*), post_tags(tag:tags(*))")
-    .eq("slug", slug)
-    .eq("status", "published")
-    .single();
+  const [
+    { data: post, error },
+    { data: { user } },
+  ] = await Promise.all([
+    supabase
+      .from("posts")
+      .select("*, category:categories(*), post_tags(tag:tags(*))")
+      .eq("slug", slug)
+      .eq("status", "published")
+      .single(),
+    supabase.auth.getUser(),
+  ]);
 
   if (error || !post) return null;
 
@@ -52,27 +58,27 @@ export async function getPostBySlug(slug: string) {
     .map((pt) => pt.tag)
     .filter(Boolean);
 
-  const { count: likesCount } = await supabase
-    .from("likes")
-    .select("*", { count: "exact", head: true })
-    .eq("post_id", raw.id as string);
+  const postId = raw.id as string;
 
-  const { data: { user } } = await supabase.auth.getUser();
-  let userLiked = false;
-  if (user) {
-    const { count } = await supabase
+  const [{ count: likesCount }, userLikedResult] = await Promise.all([
+    supabase
       .from("likes")
       .select("*", { count: "exact", head: true })
-      .eq("post_id", raw.id as string)
-      .eq("user_id", user.id);
-    userLiked = (count || 0) > 0;
-  }
+      .eq("post_id", postId),
+    user
+      ? supabase
+          .from("likes")
+          .select("*", { count: "exact", head: true })
+          .eq("post_id", postId)
+          .eq("user_id", user.id)
+      : Promise.resolve(null),
+  ]);
 
   return {
     ...post,
     tags,
     likes_count: likesCount || 0,
-    user_liked: userLiked,
+    user_liked: userLikedResult ? (userLikedResult.count || 0) > 0 : false,
   } as Post;
 }
 
