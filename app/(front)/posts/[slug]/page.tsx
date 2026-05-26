@@ -1,10 +1,28 @@
 import { getPostBySlug } from "@/lib/data/posts";
 import { notFound } from "next/navigation";
-import { MarkdownRenderer } from "@/components/markdown-renderer";
+import dynamic from "next/dynamic";
 import { LikeButton } from "./like-button";
 import { Comments } from "./comments";
 import Link from "next/link";
 import { Calendar, Tag } from "lucide-react";
+import type { Metadata } from "next";
+
+const MarkdownRenderer = dynamic(
+  () => import("@/components/markdown-renderer").then((m) => m.MarkdownRenderer),
+  { loading: () => <div className="animate-pulse h-40 bg-white/5 rounded-xl" /> },
+);
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await getPostBySlug(slug);
+  if (!post) return { title: "文章不存在" };
+  return {
+    title: `${post.title} — XandGood`,
+    description: post.summary || undefined,
+  };
+}
+
+export const revalidate = 3600;
 
 export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

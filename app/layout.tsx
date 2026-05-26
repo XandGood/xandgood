@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import { ToastProvider } from "@/components/toaster";
-import "highlight.js/styles/atom-one-dark.css";
 import "./globals.css";
 
 const defaultUrl = process.env.VERCEL_URL

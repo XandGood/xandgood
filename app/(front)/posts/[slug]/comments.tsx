@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/toaster";
 import type { Comment, Profile } from "@/lib/types";
@@ -12,6 +13,7 @@ export function Comments({ postId }: { postId: string }) {
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<ReturnType<typeof createClient>["auth"] extends { getUser(): Promise<{ data: { user: infer U } }> } ? U : never>(null as never);
   const { success, error: showError } = useToast();
+  const router = useRouter();
 
   const loadComments = useCallback(async () => {
     const supabase = createClient();
@@ -36,9 +38,17 @@ export function Comments({ postId }: { postId: string }) {
       }));
 
       const topLevel = commentsWithProfiles.filter((c: Comment) => !c.parent_id);
+      const repliesMap = new Map<string, Comment[]>();
+      for (const c of commentsWithProfiles) {
+        if (c.parent_id) {
+          const list = repliesMap.get(c.parent_id) || [];
+          list.push(c);
+          repliesMap.set(c.parent_id, list);
+        }
+      }
       const withReplies = topLevel.map((c: Comment) => ({
         ...c,
-        replies: commentsWithProfiles.filter((r: Comment) => r.parent_id === c.id),
+        replies: repliesMap.get(c.id) || [],
       }));
       setComments(withReplies as Comment[]);
     }
@@ -55,7 +65,7 @@ export function Comments({ postId }: { postId: string }) {
     const supabase = createClient();
     const { data: { user: currentUser } } = await supabase.auth.getUser();
     if (!currentUser) {
-      window.location.href = "/auth/login";
+      router.push("/auth/login");
       return;
     }
 

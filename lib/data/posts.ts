@@ -1,7 +1,8 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import type { Post, Tag } from "@/lib/types";
 
-export async function getPublishedPosts(
+export const getPublishedPosts = cache(async function getPublishedPosts(
   page = 1,
   perPage = 10,
   categoryId?: string,
@@ -28,14 +29,13 @@ export async function getPublishedPosts(
   const postsWithTags = posts.map((post: Record<string, unknown>) => ({
     ...post,
     tags: ((post.post_tags as Array<{ tag: Tag }>) || [])
-      .map((pt) => pt.tag)
-      .filter(Boolean),
+      .flatMap((pt) => pt.tag ? [pt.tag] : []),
   })) as Post[];
 
   return { posts: postsWithTags, total: count || 0 };
-}
+});
 
-export async function getPostBySlug(slug: string) {
+export const getPostBySlug = cache(async function getPostBySlug(slug: string) {
   const supabase = await createClient();
 
   const [
@@ -55,8 +55,7 @@ export async function getPostBySlug(slug: string) {
 
   const raw = post as Record<string, unknown>;
   const tags = ((raw.post_tags as Array<{ tag: Tag }>) || [])
-    .map((pt) => pt.tag)
-    .filter(Boolean);
+    .flatMap((pt) => pt.tag ? [pt.tag] : []);
 
   const postId = raw.id as string;
 
@@ -80,10 +79,10 @@ export async function getPostBySlug(slug: string) {
     likes_count: likesCount || 0,
     user_liked: userLikedResult ? (userLikedResult.count || 0) > 0 : false,
   } as Post;
-}
+});
 
-export async function getSiteSettings() {
+export const getSiteSettings = cache(async function getSiteSettings() {
   const supabase = await createClient();
   const { data } = await supabase.from("site_settings").select("*").single();
   return data;
-}
+});

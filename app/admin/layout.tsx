@@ -3,6 +3,7 @@ import Link from "next/link";
 import { LogoutButton } from "@/components/logout-button";
 import { AdminErrorToast } from "@/components/admin-error-toast";
 import { FileText, FolderOpen, Tag, MessageSquare, BookOpen, Users, Settings } from "lucide-react";
+import "highlight.js/styles/atom-one-dark.css";
 const navItems = [
   { href: "/admin/posts", label: "文章管理", icon: FileText },
   { href: "/admin/categories", label: "分类管理", icon: FolderOpen },

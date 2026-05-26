@@ -1,16 +1,17 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import type { Tag } from "@/lib/types";
 
-export async function getTags(): Promise<Tag[]> {
+export const getTags = cache(async function getTags(): Promise<Tag[]> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("tags")
     .select("*")
     .order("name");
   return data || [];
-}
+});
 
-export async function getTagsWithCount() {
+export const getTagsWithCount = cache(async function getTagsWithCount() {
   const supabase = await createClient();
   const { data: tags } = await supabase
     .from("tags")
@@ -23,4 +24,4 @@ export async function getTagsWithCount() {
     ...tag,
     count: (tag.post_tags as Array<{ count: number }>)?.[0]?.count || 0,
   })) as Tag[];
-}
+});

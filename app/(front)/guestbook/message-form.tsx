@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/toaster";
 import type { User } from "@supabase/supabase-js";
@@ -10,6 +11,7 @@ export function MessageForm() {
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const { success, error: showError } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     const supabase = createClient();
@@ -21,7 +23,7 @@ export function MessageForm() {
     const supabase = createClient();
     const { data: { user: currentUser } } = await supabase.auth.getUser();
     if (!currentUser) {
-      window.location.href = "/auth/login";
+      router.push("/auth/login");
       return;
     }
 

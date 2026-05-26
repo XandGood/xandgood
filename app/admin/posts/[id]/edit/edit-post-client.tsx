@@ -1,8 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { updatePost } from "../../actions";
-import { MarkdownEditor } from "@/components/markdown-editor";
+
+const MarkdownEditor = dynamic(
+  () => import("@/components/markdown-editor").then((m) => m.MarkdownEditor),
+  { ssr: false, loading: () => <div className="h-[520px] animate-pulse bg-white/5 rounded-xl" /> },
+);
 
 function pill(active: boolean) {
   return active

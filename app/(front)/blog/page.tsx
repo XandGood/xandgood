@@ -3,6 +3,14 @@ import { getCategories } from "@/lib/data/categories";
 import { getTagsWithCount } from "@/lib/data/tags";
 import { BlogCard } from "@/components/blog-card";
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "文章列表 — XandGood",
+  description: "浏览所有博客文章",
+};
+
+export const revalidate = 3600;
 
 export default async function BlogPage({
   searchParams,

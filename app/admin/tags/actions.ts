@@ -4,15 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { adminAction } from "@/lib/admin-action";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-
-function slugify(text: string) {
-  return text
-    .toLowerCase()
-    .replace(/[\s]+/g, "-")
-    .replace(/[^a-z0-9-]/g, "")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-}
+import { slugify } from "@/lib/utils";
 
 export const createTag = adminAction("createTag", async (formData) => {
   const admin = createAdminClient();

@@ -4,6 +4,14 @@ import { getPublishedPosts } from "@/lib/data/posts";
 import { getTagsWithCount } from "@/lib/data/tags";
 import { getCategories } from "@/lib/data/categories";
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "XandGood — 个人博客",
+  description: "记录思考，分享技术",
+};
+
+export const revalidate = 3600;
 
 export default async function Home({
   searchParams,

@@ -4,15 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { adminAction } from "@/lib/admin-action";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-
-function slugify(text: string) {
-  return text
-    .toLowerCase()
-    .replace(/[\s]+/g, "-")
-    .replace(/[^a-z0-9-]/g, "")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-}
+import { slugify } from "@/lib/utils";
 
 export const createPost = adminAction("createPost", async (formData) => {
   const admin = createAdminClient();
@@ -68,9 +60,11 @@ export const updatePost = adminAction("updatePost", async (formData) => {
 
   const { data: existingTags } = await admin.from("post_tags").select("tag_id").eq("post_id", id);
   const existingIds = (existingTags || []).map((r) => r.tag_id);
+  const existingSet = new Set(existingIds);
+  const newSet = new Set(tagIds);
 
-  const toAdd = tagIds.filter((tid) => !existingIds.includes(tid));
-  const toRemove = existingIds.filter((tid) => !tagIds.includes(tid));
+  const toAdd = tagIds.filter((tid) => !existingSet.has(tid));
+  const toRemove = existingIds.filter((tid) => !newSet.has(tid));
 
   if (toAdd.length > 0) {
     const { error: insertError } = await admin.from("post_tags").insert(
