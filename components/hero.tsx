@@ -1,6 +1,6 @@
 interface HeroProps {
   postCount: number;
-  viewCount: string;
+  viewCount: number;
 }
 
 export function Hero({ postCount, viewCount }: HeroProps) {
@@ -26,7 +26,7 @@ export function Hero({ postCount, viewCount }: HeroProps) {
               文章总量
             </span>
             <span className="text-3xl lg:text-4xl font-black tabular-nums text-white/90 drop-shadow-md leading-none">
-              {postCount}
+              {postCount.toLocaleString("zh-CN")}
             </span>
           </div>
 
@@ -41,7 +41,7 @@ export function Hero({ postCount, viewCount }: HeroProps) {
               全站浏览
             </span>
             <span className="text-3xl lg:text-4xl font-black tabular-nums text-white/90 drop-shadow-md leading-none">
-              {viewCount}
+              {viewCount.toLocaleString("zh-CN")}
             </span>
           </div>
         </div>

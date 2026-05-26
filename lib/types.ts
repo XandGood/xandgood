@@ -13,6 +13,7 @@ export type Post = {
   tags?: Tag[];
   likes_count?: number;
   user_liked?: boolean;
+  view_count?: number;
 };
 
 export type Category = {

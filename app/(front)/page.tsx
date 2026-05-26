@@ -1,6 +1,6 @@
 import { Hero } from "@/components/hero";
 import { BlogCard } from "@/components/blog-card";
-import { getPublishedPosts } from "@/lib/data/posts";
+import { getPublishedPosts, getTotalViews } from "@/lib/data/posts";
 import { getTagsWithCount } from "@/lib/data/tags";
 import { getCategories } from "@/lib/data/categories";
 import Link from "next/link";
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description: "记录思考，分享技术",
 };
 
-export const revalidate = 3600;
+export const revalidate = 60;
 
 export default async function Home({
   searchParams,
@@ -20,17 +20,18 @@ export default async function Home({
 }) {
   const { category: categoryId, page: pageStr } = await searchParams;
   const page = parseInt(pageStr || "1", 10);
-  const [{ posts, total }, tags, categories] = await Promise.all([
+  const [{ posts, total }, tags, categories, totalViews] = await Promise.all([
     getPublishedPosts(page, 10, categoryId),
     getTagsWithCount(),
     getCategories(),
+    getTotalViews(),
   ]);
   const totalPages = Math.ceil(total / 10);
   return (
     <main className="flex-1 max-w-7xl mx-auto w-full px-5 pt-32 pb-20">
       <div className="flex gap-8 flex-col lg:flex-row">
         <div className="lg:flex-1 min-w-0">
-          <Hero postCount={posts.length} viewCount={`${posts.length}`} />
+          <Hero postCount={total} viewCount={totalViews} />
 
           <div className="glass-liquid p-5 mb-8 lg:hidden">
             <h3 className="text-xs font-semibold tracking-widest text-white/50 uppercase mb-3">分类</h3>

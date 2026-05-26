@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { Post, Tag } from "@/lib/types";
 
 export const getPublishedPosts = cache(async function getPublishedPosts(
@@ -79,6 +80,20 @@ export const getPostBySlug = cache(async function getPostBySlug(slug: string) {
     likes_count: likesCount || 0,
     user_liked: userLikedResult ? (userLikedResult.count || 0) > 0 : false,
   } as Post;
+});
+
+export async function incrementPostView(postId: string) {
+  const admin = createAdminClient();
+  await admin.rpc("increment_view_count", { target_post_id: postId });
+}
+
+export const getTotalViews = cache(async function getTotalViews() {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("posts")
+    .select("view_count")
+    .eq("status", "published");
+  return (data || []).reduce((sum, p) => sum + (p.view_count || 0), 0);
 });
 
 export const getSiteSettings = cache(async function getSiteSettings() {

@@ -1,10 +1,11 @@
-import { getPostBySlug } from "@/lib/data/posts";
+import { getPostBySlug, incrementPostView } from "@/lib/data/posts";
 import { notFound } from "next/navigation";
+import { after } from "next/server";
 import dynamic from "next/dynamic";
 import { LikeButton } from "./like-button";
 import { Comments } from "./comments";
 import Link from "next/link";
-import { Calendar, Tag } from "lucide-react";
+import { Calendar, Tag, Eye } from "lucide-react";
 import type { Metadata } from "next";
 
 const MarkdownRenderer = dynamic(
@@ -22,13 +23,17 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
-export const revalidate = 3600;
+export const revalidate = 60;
 
 export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const post = await getPostBySlug(slug);
 
   if (!post) notFound();
+
+  after(async () => {
+    await incrementPostView(post.id);
+  });
 
   return (
     <main className="flex-1 max-w-4xl mx-auto w-full px-5 pt-32 pb-20">
@@ -38,6 +43,10 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
             <span className="flex items-center gap-1.5 font-medium">
               <Calendar className="w-3.5 h-3.5 text-white/40" />
               {post.published_at ? new Date(post.published_at).toLocaleDateString("zh-CN") : "未发布"}
+            </span>
+            <span className="flex items-center gap-1.5 font-medium">
+              <Eye className="w-3.5 h-3.5 text-white/40" />
+              {post.view_count ?? 0}
             </span>
             {post.category && (
               <Link href={`/blog?category=${post.category.id}`} className="glass-pill px-3 py-1.5 text-[10px] uppercase text-white/70 hover:text-white">
